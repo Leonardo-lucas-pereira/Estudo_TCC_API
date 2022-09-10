@@ -1,6 +1,9 @@
 package middlewares
 
 import (
+	"log"
+	"reflect"
+
 	"github.com/Leonardo-lucas-pereira/tcc-api/services"
 	"github.com/gin-gonic/gin"
 )
@@ -14,6 +17,11 @@ func Auth() gin.HandlerFunc {
 		}
 
 		token := header[len(Beare_schema):]
+		claim, _ := services.NewJWTServices().ExtractClaims(token)
+		log.Print(reflect.TypeOf(claim))
+		log.Print(claim)
+		log.Print(claim["sum"])
+		log.Print(claim["is_adm"])
 
 		if !services.NewJWTServices().ValidateToken(token) {
 			c.AbortWithStatus(401)

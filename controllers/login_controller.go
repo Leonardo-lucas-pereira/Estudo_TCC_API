@@ -38,7 +38,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	token, err := services.NewJWTServices().GenerateToken(user.ID)
+	token, err := services.NewJWTServices().GenerateToken(user.ID, user.IsAdm)
 	if err != nil {
 		c.JSON(500, gin.H{
 			"error": err.Error(),

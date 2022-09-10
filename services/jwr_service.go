@@ -2,6 +2,7 @@ package services
 
 import (
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -21,12 +22,14 @@ func NewJWTServices() *jwtService {
 
 type Claim struct {
 	Sum uint `json:"sum"`
+	Adm bool `json:"is_adm"`
 	jwt.StandardClaims
 }
 
-func (s *jwtService) GenerateToken(id uint) (string, error) {
+func (s *jwtService) GenerateToken(id uint, isAdm bool) (string, error) {
 	claim := &Claim{
 		id,
+		isAdm,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 2).Unix(),
 			Issuer:    s.issure,
@@ -54,4 +57,23 @@ func (s *jwtService) ValidateToken(token string) bool {
 	})
 
 	return err == nil
+}
+
+func (s *jwtService) ExtractClaims(tokenStr string) (jwt.MapClaims, bool) {
+	hmacSecret := []byte(s.secretKey)
+	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
+		// check token signing method etc
+		return hmacSecret, nil
+	})
+
+	if err != nil {
+		return nil, false
+	}
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		return claims, true
+	} else {
+		log.Printf("Invalid JWT Token")
+		return nil, false
+	}
 }
