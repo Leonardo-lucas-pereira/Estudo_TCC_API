@@ -60,3 +60,17 @@ func GetUser(c *gin.Context) {
 
 	c.JSON(200, user)
 }
+
+func ListUsers(c *gin.Context) {
+	db := database.GetDatabase()
+	var users []models.User
+
+	err := db.Find(&users).Error
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "cannot list users: " + err.Error(),
+		})
+		return
+	}
+	c.JSON(200, users)
+}
