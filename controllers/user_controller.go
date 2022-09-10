@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"strconv"
+
 	"github.com/Leonardo-lucas-pereira/tcc-api/database"
 	"github.com/Leonardo-lucas-pereira/tcc-api/models"
 	"github.com/Leonardo-lucas-pereira/tcc-api/services"
@@ -31,4 +33,30 @@ func CreateUser(c *gin.Context) {
 	}
 
 	c.Status(204)
+}
+
+func GetUser(c *gin.Context) {
+	id := c.Param("id")
+
+	newid, err := strconv.Atoi(id)
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "ID has to be integer",
+		})
+		return
+	}
+
+	db := database.GetDatabase()
+
+	var user models.User
+
+	err = db.First(&user, newid).Error
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "cannot find user" + err.Error(),
+		})
+		return
+	}
+
+	c.JSON(200, user)
 }
